@@ -1,0 +1,28 @@
+name: .NET API Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/dotnet/sdk:8.0
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Verify .NET
+      run: dotnet --version
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    
+    - name: Run Tests
+      run: dotnet test --configuration Release --no-build --verbosity normal
