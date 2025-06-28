@@ -123,7 +123,7 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddControllers();
 
 // TODO: Uncomment and implement the Deezer service if needed
-//builder.Services.AddHttpClient<IDeezerService, DeezerService>();
+builder.Services.AddHttpClient<IDeezerService, DeezerService>();
 
 
 builder.Services.AddSingleton<ArtistManager>();
@@ -143,9 +143,9 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 });
 
 // Add Database Testing Service
-//builder.Services.Configure<DatabaseTestConfig>(builder.Configuration.GetSection("DatabaseTesting"));
-//builder.Services.AddSingleton<DatabaseTestService>();
-//builder.Services.AddHostedService(provider => provider.GetRequiredService<DatabaseTestService>());
+builder.Services.Configure<DatabaseTestConfig>(builder.Configuration.GetSection("DatabaseTesting"));
+builder.Services.AddSingleton<DatabaseTestService>();
+builder.Services.AddHostedService(provider => provider.GetRequiredService<DatabaseTestService>());
 
 var app = builder.Build();
 
