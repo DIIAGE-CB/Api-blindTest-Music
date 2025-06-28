@@ -1,58 +1,72 @@
-networks:
-  db_network:
-    driver: bridge
-
 services:
-  db:
-    image: postgres:alpine
-    container_name: postgres_db_diiage
+  mssqldb:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    container_name: mssqlserver_diiage
+    restart: always
+    hostname: mssqldb_diiage
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: DotnetApi
+      SA_PASSWORD: Password123456789
+      ACCEPT_EULA: Y
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - mssql_data:/var/opt/mssql
     networks:
       - db_network
     ports:
-      - "5433:5432"
+      - 1433:1433
+
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_diiage
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - ./dbdata/mogodb:/data/db
+    networks:
+      - db_network
+    ports:
+      - "27017:27017"
+
 
   dotnet_api-build:
     image: mcr.microsoft.com/dotnet/sdk:8.0
     container_name: dotnet_api-build
-    working_dir: /app
+    working_dir: /src
     volumes:
-      - dotnet:/app
+      - ./:/src
+      - dotnet_publish:/app/publish
     command: >
-      sh -c "apt-get update && apt-get install -y git curl && \
-         if [ ! -d .git ]; then \
-           git clone https://github.com/DIIAGE-CB/Api-blindTest-Music.git .; \
-         else \
-           git pull; \
-         fi && \
-         dotnet restore API/API.csproj && \
-         dotnet publish API/API.csproj -c Release -o /app/publish /p:UseAppHost=false"
+      sh -c "dotnet restore /src/API/API.csproj && \
+            dotnet publish /src/API/API.csproj -c Release -o /app/publish /p:UseAppHost=false"
     networks:
       - db_network
-
 
   dotnet_api:
     image: mcr.microsoft.com/dotnet/aspnet:8.0-alpine
     container_name: dotnet_api
     working_dir: /app
     volumes:
-      - dotnet:/app
+      - dotnet_publish:/app
+      - ./Logs/dotnet:/app/Logs
     environment:
-      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_ENVIRONMENT: Development
     ports:
-      - "80:5000"
+      - "80:8080"
     depends_on:
-      - db
-      - dotnet_api-build
+      dotnet_api-build:
+        condition: service_completed_successfully
+      mssqldb:
+        condition: service_started
+      mongodb:
+        condition: service_started
     networks:
       - db_network
-    command: ["dotnet", "/app/publish/API.dll"]
+    command: ["dotnet", "/app/API.dll"]
+
+networks:
+  db_network:
+    driver: bridge
 
 volumes:
-  pgdata:
-  dotnet:
+  dotnet_publish:
+  mssql_data:
