@@ -1,8 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using DAL.Entities;
 
-public class ApplicationDbContext : DbContext
+namespace DAL
 {
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
-    public DbSet<User> Users { get; set; }
+    public class ApplicationDbContext : DbContext
+    {
+        public DbSet<Artist> Artists { get; set; }
+        public DbSet<Album> Albums { get; set; }
+        public DbSet<Track> Tracks { get; set; }
+
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+    }
 }
