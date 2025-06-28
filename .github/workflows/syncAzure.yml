@@ -3,14 +3,17 @@ name: Sync GitHub to Azure DevOps
 on:
   push:
     branches:
-      - dev
+      - main
 
 jobs:
   sync_to_azure:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout repository with full history
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # ❗️ Important pour autoriser un push complet
 
     - name: Add Azure DevOps remote
       env:
@@ -28,4 +31,4 @@ jobs:
 
     - name: Push to Azure DevOps
       run: |
-        git push azure HEAD:dev
+        git push --force azure HEAD:dev
