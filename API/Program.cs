@@ -1,10 +1,15 @@
 using DAL;
 using BL;
+using Tools;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
 using System.Reflection;
 using Microsoft.OpenApi.Models;
+using MongoDB.Driver;
+using API.Middleware;
+using API.Services;
+using DTO.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,8 +29,8 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Version = "v1",
-        Title = "IoT API",
-        Description = "An ASP.NET Core Web API for managing IoT Data",
+        Title = "Deezer Blind Test API",
+        Description = "An ASP.NET Core Web API for managing artists and their albums in a blind test format.",
     });
 
     // TODO: Add servers based on the environment
@@ -116,12 +121,34 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddScoped<IUserService, UserService>();
+
+// TODO: Uncomment and implement the Deezer service if needed
+//builder.Services.AddHttpClient<IDeezerService, DeezerService>();
+
+
+builder.Services.AddSingleton<ArtistManager>();
+
 builder.Services.AddHostedService<LogRetentionService>();
+
+
+// Add MSSQL Database Context
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("MSSQLDBConnection")));
+
+// Add MongoDB Connection
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var mongoConnectionString = builder.Configuration.GetConnectionString("MongoDBConnection");
+    return new MongoClient(mongoConnectionString);
+});
+
+// Add Database Testing Service
+//builder.Services.Configure<DatabaseTestConfig>(builder.Configuration.GetSection("DatabaseTesting"));
+//builder.Services.AddSingleton<DatabaseTestService>();
+//builder.Services.AddHostedService(provider => provider.GetRequiredService<DatabaseTestService>());
 
 var app = builder.Build();
+
 // to seed a db
 // var scope = app.Services.CreateScope();
 // var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -150,6 +177,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthorization();
+
+app.UseMiddleware<TimingMiddleware>();
 
 app.UseHttpsRedirection();
 
