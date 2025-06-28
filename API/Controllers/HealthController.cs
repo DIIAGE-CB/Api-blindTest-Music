@@ -1,10 +1,12 @@
 ﻿using DTO;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace API.Controllers
 {
     [ApiController]
     [Produces("application/json")]
+    [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)] // Explicitly disable caching
     public class HealthController : ControllerBase
     {
         private readonly ILogger<HealthController> _logger;
@@ -17,31 +19,35 @@ namespace API.Controllers
         /// <summary>
         /// Check the health status of the API.
         /// </summary>
-        /// <returns>Returns a string indicating the health status of the API.</returns>
+        /// <returns>Returns a health status response.</returns>
         /// <response code="200">API is healthy.</response>
         /// <response code="500">Internal server error.</response>
         [HttpGet("health")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(HealthResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult<HealthResponse> GetHealth()
         {
+            var stopwatch = Stopwatch.StartNew();
             try
             {
-                DateTime startTime = DateTime.UtcNow;
-                _logger.LogInformation("Health check requested.");
                 var response = new HealthResponse
                 {
                     Status = "OK",
                     Version = "1.0",
                     DateTime = DateTime.UtcNow,
-                    TimeResponse = DateTime.UtcNow - startTime,
+                    TimeResponse = stopwatch.ElapsedMilliseconds
                 };
+
                 return Ok(response);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while checking the health status.");
-                return StatusCode(StatusCodes.Status500InternalServerError, new { status = "Internal server error" });
+                _logger.LogError(ex, "Health check failed");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+            finally
+            {
+                stopwatch.Stop();
             }
         }
     }
