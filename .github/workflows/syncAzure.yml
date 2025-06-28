@@ -16,7 +16,7 @@ jobs:
       env:
         AZURE_DEVOPS_TOKEN: ${{ secrets.AZURE_DEVOPS_TOKEN }}
       run: |
-        git remote add azure "https://$AZURE_DEVOPS_TOKEN@dev.azure.com/ClementBobin/test/_git/Api-blindTest-Music"
+        git remote add azure "https://$AZURE_DEVOPS_TOKEN@dev.azure.com/ClementBobin/2028%20SUMMER%20PROJECT%20BOBIN/_git/Api"
 
     - name: Fetch from Azure DevOps
       run: |
