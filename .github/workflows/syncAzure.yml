@@ -28,4 +28,4 @@ jobs:
 
     - name: Push to Azure DevOps
       run: |
-        git push azure HEAD:dev
+        git push --force azure HEAD:dev
