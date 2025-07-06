@@ -3,7 +3,7 @@ namespace DAL.Entities
     public class Artist
     {
         public Guid Id { get; set; } = Guid.NewGuid();
-        public int DeezerId { get; set; }
+        public long DeezerId { get; set; }
         public string Name { get; set; }
         public string PictureSmall { get; set; }
         public string PictureMedium { get; set; }

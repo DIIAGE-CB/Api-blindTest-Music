@@ -65,18 +65,18 @@ public class DeezerService : IDeezerService
                 Title = t.Title ?? "Unknown Track",
                 Duration = t.Duration,
                 Preview = t.Preview ?? string.Empty,
-                Album = t.Album != null ? new AlbumSearchResultDTO
+                Album = t.Album != null ? new AlbumShortDTO
                 {
                     Id = t.Album.Id,
                     Title = t.Album.Title ?? "Unknown Album",
-                    CoverSmall = t.Album.CoverSmall ?? string.Empty
-                } : new AlbumSearchResultDTO(),
-                Artist = t.Artist != null ? new ArtistSearchResultDTO
+                    Cover = t.Album.CoverSmall ?? string.Empty
+                } : new AlbumShortDTO(),
+                Artist = t.Artist != null ? new ArtistShortDTO
                 {
-                    Id = t.Artist.Id,
+                    DeezerId = t.Artist.Id,
                     Name = t.Artist.Name ?? "Unknown Artist",
                     PictureSmall = t.Artist.PictureSmall ?? string.Empty
-                } : new ArtistSearchResultDTO()
+                } : new ArtistShortDTO()
             }).Take(limit).ToList() ?? new List<TrackSearchResultDTO>();
 
             return new SearchResultDTO { Tracks = tracks };
